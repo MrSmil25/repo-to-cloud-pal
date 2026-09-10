@@ -10,7 +10,8 @@ import { canManageCash, fetchMyBills, fetchPendingClaims } from "@/lib/cash";
 import { SupervisorOverview } from "@/components/assignments/SupervisorOverview";
 import { UrgentBanners } from "@/components/announcements/UrgentBanners";
 import { WelcomeGuideCard } from "@/components/WelcomeGuideCard";
-import { countContributionsThisWeek, countUnacknowledgedCoaching } from "@/lib/hr";
+import { countContributionsThisWeek, countUnacknowledgedCoaching, isKadiv } from "@/lib/hr";
+import { countUnacknowledgedWarnings, fetchWarnings } from "@/lib/warnings";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -78,6 +79,22 @@ function DashboardPage() {
     queryFn: () => countContributionsThisWeek(profile!.id),
     enabled: !!profile?.id,
   });
+
+  const { data: unackWarnings = 0 } = useQuery({
+    queryKey: ["warnings-unack", profile?.id],
+    queryFn: () => countUnacknowledgedWarnings(profile!.id),
+    enabled: !!profile?.id,
+  });
+
+  const kadiv = isKadiv(profile?.role);
+  const { data: divisionWarnings = [] } = useQuery({
+    queryKey: ["warnings", "division-active", profile?.division],
+    queryFn: () => fetchWarnings({ activeOnly: true }),
+    enabled: kadiv && !!profile?.division,
+  });
+  const divisionWarningCount = divisionWarnings.filter(
+    (w) => w.member?.division === profile?.division,
+  ).length;
 
   const activeEvents = events.filter((e) =>
     ["Planning", "Preparation", "Live"].includes(e.status ?? ""),
