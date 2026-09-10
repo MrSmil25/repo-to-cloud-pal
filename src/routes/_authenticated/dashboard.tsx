@@ -10,7 +10,8 @@ import { canManageCash, fetchMyBills, fetchPendingClaims } from "@/lib/cash";
 import { SupervisorOverview } from "@/components/assignments/SupervisorOverview";
 import { UrgentBanners } from "@/components/announcements/UrgentBanners";
 import { WelcomeGuideCard } from "@/components/WelcomeGuideCard";
-import { countContributionsThisWeek, countUnacknowledgedCoaching } from "@/lib/hr";
+import { countContributionsThisWeek, countUnacknowledgedCoaching, isKadiv } from "@/lib/hr";
+import { countUnacknowledgedWarnings, fetchWarnings } from "@/lib/warnings";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -79,6 +80,22 @@ function DashboardPage() {
     enabled: !!profile?.id,
   });
 
+  const { data: unackWarnings = 0 } = useQuery({
+    queryKey: ["warnings-unack", profile?.id],
+    queryFn: () => countUnacknowledgedWarnings(profile!.id),
+    enabled: !!profile?.id,
+  });
+
+  const kadiv = isKadiv(profile?.role);
+  const { data: divisionWarnings = [] } = useQuery({
+    queryKey: ["warnings", "division-active", profile?.division],
+    queryFn: () => fetchWarnings({ activeOnly: true }),
+    enabled: kadiv && !!profile?.division,
+  });
+  const divisionWarningCount = divisionWarnings.filter(
+    (w) => w.member?.division === profile?.division,
+  ).length;
+
   const activeEvents = events.filter((e) =>
     ["Planning", "Preparation", "Live"].includes(e.status ?? ""),
   );
@@ -100,8 +117,27 @@ function DashboardPage() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
+      {unackWarnings > 0 && (
+        <Link
+          to="/warnings"
+          className="block rounded-2xl border-2 border-red-400 bg-red-50 p-5 font-semibold text-red-900 shadow-sm transition-colors hover:bg-red-100"
+        >
+          Kamu punya {unackWarnings} peringatan yang perlu dibaca. Klik untuk membukanya.
+        </Link>
+      )}
+
       <UrgentBanners />
       <WelcomeGuideCard />
+
+      {kadiv && divisionWarningCount > 0 && (
+        <Link
+          to="/warnings"
+          className="block rounded-2xl border bg-card p-5 shadow-sm transition-colors hover:bg-accent/40"
+        >
+          SP aktif di divisi kamu:{" "}
+          <span className="font-semibold">{divisionWarningCount}</span>
+        </Link>
+      )}
 
       {unpaidBills > 0 && (
         <Link

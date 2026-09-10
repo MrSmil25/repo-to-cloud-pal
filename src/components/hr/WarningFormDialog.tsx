@@ -133,8 +133,9 @@ export function WarningFormDialog({
     return rows.reduce((a, b) => (levelRank(b.level) > levelRank(a.level) ? b : a));
   }, [existing.data]);
 
-  const suggested = highest
-    ? WARNING_LEVELS[Math.min(levelRank(highest.level) + 1, WARNING_LEVELS.length - 1)]
+  const suggested: (typeof WARNING_LEVELS)[number] = highest
+    ? (WARNING_LEVELS[Math.min(levelRank(highest.level) + 1, WARNING_LEVELS.length - 1)] ??
+      "Teguran_Lisan")
     : "Teguran_Lisan";
 
   const skipping = levelRank(level) > levelRank(suggested);

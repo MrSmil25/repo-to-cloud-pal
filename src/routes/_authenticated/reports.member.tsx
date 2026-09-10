@@ -13,6 +13,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  fetchWarnings,
+  WARNING_LEVEL_BADGE,
+  WARNING_LEVEL_LABEL,
+  WARNING_STATUS_BADGE,
+} from "@/lib/warnings";
 import { UserAvatar } from "@/components/UserAvatar";
 import { useMyProfile, useProfiles, isBPH } from "@/hooks/useProfile";
 import {
@@ -124,6 +130,12 @@ function MemberReportPage() {
     enabled: !!query,
   });
 
+  const memberWarnings = useQuery({
+    queryKey: ["warnings", "member", query?.member],
+    queryFn: () => fetchWarnings({ memberId: query!.member }),
+    enabled: !!query,
+  });
+
   const memberProfile = profiles.find((p) => p.id === (query?.member ?? selected));
   const r = report.data;
 
@@ -211,6 +223,7 @@ function MemberReportPage() {
               <TabsTrigger value="metrik">Metrik</TabsTrigger>
               <TabsTrigger value="bimbingan">Catatan Bimbingan</TabsTrigger>
               <TabsTrigger value="kontribusi">Catatan Kontribusi</TabsTrigger>
+              <TabsTrigger value="peringatan">Riwayat Peringatan</TabsTrigger>
             </TabsList>
 
             <TabsContent value="metrik" className="mt-4">
@@ -302,6 +315,48 @@ function MemberReportPage() {
                       </span>
                     </div>
                     <p className="mt-2 whitespace-pre-wrap text-sm">{c.description}</p>
+                  </article>
+                ))
+              )}
+            </TabsContent>
+
+            <TabsContent value="peringatan" className="mt-4 space-y-3">
+              {memberWarnings.isLoading ? (
+                <p className="text-sm text-muted-foreground">Memuat…</p>
+              ) : (memberWarnings.data ?? []).length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  Belum ada catatan peringatan untuk anggota ini.
+                </p>
+              ) : (
+                (memberWarnings.data ?? []).map((w) => (
+                  <article key={w.id} className="rounded-2xl border bg-card p-4 shadow-sm">
+                    <div className="flex flex-wrap items-center gap-2 text-xs">
+                      <span
+                        className={`rounded-full px-2 py-0.5 font-semibold ${WARNING_LEVEL_BADGE[w.level] ?? "bg-secondary"}`}
+                      >
+                        {WARNING_LEVEL_LABEL[w.level] ?? w.level}
+                      </span>
+                      <span
+                        className={`rounded-full px-2 py-0.5 font-semibold ${WARNING_STATUS_BADGE[w.status] ?? "bg-secondary"}`}
+                      >
+                        {w.status}
+                      </span>
+                      <span className="text-muted-foreground">
+                        {formatDateID(w.issued_at ?? w.created_at)}
+                      </span>
+                      <span className="text-muted-foreground">
+                        diterbitkan oleh {w.issuer?.full_name ?? "—"}
+                      </span>
+                    </div>
+                    <p className="mt-2 whitespace-pre-wrap text-sm">{w.reason}</p>
+                    {w.member_response && (
+                      <div className="mt-2 rounded-xl border bg-muted/40 p-3">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                          Tanggapan anggota
+                        </p>
+                        <p className="mt-1 whitespace-pre-wrap text-sm">{w.member_response}</p>
+                      </div>
+                    )}
                   </article>
                 ))
               )}

@@ -28,6 +28,7 @@ import {
   Mic,
   MailPlus,
   BookOpen,
+  AlertTriangle,
 } from "lucide-react";
 import { useState } from "react";
 import { supabase } from "@/lib/supabase-external";
@@ -94,6 +95,7 @@ const navSections = [
       { to: "/reports/holdings", label: "Serah Terima", icon: Boxes },
       { to: "/coaching", label: "Catatan Bimbingan", icon: NotebookPen },
       { to: "/contributions", label: "Feed Kontribusi", icon: Megaphone },
+      { to: "/warnings", label: "Peringatan (SP)", icon: AlertTriangle },
     ] as const,
   },
   {
