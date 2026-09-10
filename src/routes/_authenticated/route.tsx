@@ -29,6 +29,7 @@ import {
   MailPlus,
   BookOpen,
   AlertTriangle,
+  Vote,
 } from "lucide-react";
 import { useState } from "react";
 import { supabase } from "@/lib/supabase-external";
@@ -96,6 +97,7 @@ const navSections = [
       { to: "/coaching", label: "Catatan Bimbingan", icon: NotebookPen },
       { to: "/contributions", label: "Feed Kontribusi", icon: Megaphone },
       { to: "/warnings", label: "Peringatan (SP)", icon: AlertTriangle },
+      { to: "/warnings/proposals", label: "Usulan Peringatan", icon: Vote },
     ] as const,
   },
   {

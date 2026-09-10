@@ -12,6 +12,9 @@ import { UrgentBanners } from "@/components/announcements/UrgentBanners";
 import { WelcomeGuideCard } from "@/components/WelcomeGuideCard";
 import { countContributionsThisWeek, countUnacknowledgedCoaching, isKadiv } from "@/lib/hr";
 import { countUnacknowledgedWarnings, fetchWarnings } from "@/lib/warnings";
+import { fetchProposals, isEligibleVoter } from "@/lib/proposals";
+import { isBPH } from "@/hooks/useProfile";
+import { isBPHOrSupervisor } from "@/lib/hr";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -96,6 +99,19 @@ function DashboardPage() {
     (w) => w.member?.division === profile?.division,
   ).length;
 
+  const bphOrSupervisor = isBPH(profile?.role) || isBPHOrSupervisor(profile?.role);
+  const { data: proposals = [] } = useQuery({
+    queryKey: ["proposals"],
+    queryFn: fetchProposals,
+    enabled: !!profile?.id,
+  });
+  const activeProposals = proposals.filter((p) => p.status === "Voting");
+  const myVoteProposals = activeProposals.filter((p) =>
+    isEligibleVoter(p, profile ? { id: profile.id, division: profile.division } : null),
+  );
+  const proposalsAboutMe = activeProposals.filter((p) => p.target_member_id === profile?.id);
+
+
   const activeEvents = events.filter((e) =>
     ["Planning", "Preparation", "Live"].includes(e.status ?? ""),
   );
@@ -126,8 +142,39 @@ function DashboardPage() {
         </Link>
       )}
 
+      {proposalsAboutMe.map((p) => (
+        <Link
+          key={p.id}
+          to="/warnings/proposals/$id"
+          params={{ id: p.id }}
+          className="block rounded-2xl border-2 border-amber-400 bg-amber-50 p-5 font-semibold text-amber-900 shadow-sm transition-colors hover:bg-amber-100"
+        >
+          Ada usulan peringatan untuk kamu. Kamu berhak menyanggah.
+        </Link>
+      ))}
+
       <UrgentBanners />
       <WelcomeGuideCard />
+
+      {myVoteProposals.length > 0 && (
+        <Link
+          to="/warnings/proposals"
+          className="block rounded-2xl border bg-card p-5 shadow-sm transition-colors hover:bg-accent/40"
+        >
+          Ada <span className="font-semibold">{myVoteProposals.length}</span> usulan peringatan
+          menunggu suara kamu.
+        </Link>
+      )}
+
+      {bphOrSupervisor && activeProposals.length > 0 && (
+        <Link
+          to="/warnings/proposals"
+          className="block rounded-2xl border bg-card p-5 shadow-sm transition-colors hover:bg-accent/40"
+        >
+          Usulan aktif di organisasi:{" "}
+          <span className="font-semibold">{activeProposals.length}</span>
+        </Link>
+      )}
 
       {kadiv && divisionWarningCount > 0 && (
         <Link

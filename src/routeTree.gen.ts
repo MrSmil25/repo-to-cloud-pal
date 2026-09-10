@@ -56,6 +56,8 @@ import { Route as AuthenticatedMentorAssignmentsIndexRouteImport } from './route
 import { Route as AuthenticatedMentorAssignmentsIdRouteImport } from './routes/_authenticated/mentor.assignments.$id'
 import { Route as AuthenticatedReportsHoldingsIndexRouteImport } from './routes/_authenticated/reports.holdings.index'
 import { Route as AuthenticatedReportsHoldingsIdRouteImport } from './routes/_authenticated/reports.holdings.$id'
+import { Route as AuthenticatedWarningsProposalsIndexRouteImport } from './routes/_authenticated/warnings_.proposals.index'
+import { Route as AuthenticatedWarningsProposalsIdRouteImport } from './routes/_authenticated/warnings_.proposals.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -316,6 +318,18 @@ const AuthenticatedReportsHoldingsIdRoute =
     path: '/reports/holdings/$id',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedWarningsProposalsIndexRoute =
+  AuthenticatedWarningsProposalsIndexRouteImport.update({
+    id: '/warnings_/proposals/',
+    path: '/warnings/proposals/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedWarningsProposalsIdRoute =
+  AuthenticatedWarningsProposalsIdRouteImport.update({
+    id: '/warnings_/proposals/$id',
+    path: '/warnings/proposals/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -362,8 +376,10 @@ export interface FileRoutesByFullPath {
   '/speakers/': typeof AuthenticatedSpeakersIndexRoute
   '/mentor/assignments/$id': typeof AuthenticatedMentorAssignmentsIdRoute
   '/reports/holdings/$id': typeof AuthenticatedReportsHoldingsIdRoute
+  '/warnings/proposals/$id': typeof AuthenticatedWarningsProposalsIdRoute
   '/mentor/assignments/': typeof AuthenticatedMentorAssignmentsIndexRoute
   '/reports/holdings/': typeof AuthenticatedReportsHoldingsIndexRoute
+  '/warnings/proposals/': typeof AuthenticatedWarningsProposalsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -410,8 +426,10 @@ export interface FileRoutesByTo {
   '/speakers': typeof AuthenticatedSpeakersIndexRoute
   '/mentor/assignments/$id': typeof AuthenticatedMentorAssignmentsIdRoute
   '/reports/holdings/$id': typeof AuthenticatedReportsHoldingsIdRoute
+  '/warnings/proposals/$id': typeof AuthenticatedWarningsProposalsIdRoute
   '/mentor/assignments': typeof AuthenticatedMentorAssignmentsIndexRoute
   '/reports/holdings': typeof AuthenticatedReportsHoldingsIndexRoute
+  '/warnings/proposals': typeof AuthenticatedWarningsProposalsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -460,8 +478,10 @@ export interface FileRoutesById {
   '/_authenticated/speakers/': typeof AuthenticatedSpeakersIndexRoute
   '/_authenticated/mentor/assignments/$id': typeof AuthenticatedMentorAssignmentsIdRoute
   '/_authenticated/reports/holdings/$id': typeof AuthenticatedReportsHoldingsIdRoute
+  '/_authenticated/warnings_/proposals/$id': typeof AuthenticatedWarningsProposalsIdRoute
   '/_authenticated/mentor/assignments/': typeof AuthenticatedMentorAssignmentsIndexRoute
   '/_authenticated/reports/holdings/': typeof AuthenticatedReportsHoldingsIndexRoute
+  '/_authenticated/warnings_/proposals/': typeof AuthenticatedWarningsProposalsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -510,8 +530,10 @@ export interface FileRouteTypes {
     | '/speakers/'
     | '/mentor/assignments/$id'
     | '/reports/holdings/$id'
+    | '/warnings/proposals/$id'
     | '/mentor/assignments/'
     | '/reports/holdings/'
+    | '/warnings/proposals/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -558,8 +580,10 @@ export interface FileRouteTypes {
     | '/speakers'
     | '/mentor/assignments/$id'
     | '/reports/holdings/$id'
+    | '/warnings/proposals/$id'
     | '/mentor/assignments'
     | '/reports/holdings'
+    | '/warnings/proposals'
   id:
     | '__root__'
     | '/'
@@ -607,8 +631,10 @@ export interface FileRouteTypes {
     | '/_authenticated/speakers/'
     | '/_authenticated/mentor/assignments/$id'
     | '/_authenticated/reports/holdings/$id'
+    | '/_authenticated/warnings_/proposals/$id'
     | '/_authenticated/mentor/assignments/'
     | '/_authenticated/reports/holdings/'
+    | '/_authenticated/warnings_/proposals/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -951,6 +977,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedReportsHoldingsIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/warnings_/proposals/': {
+      id: '/_authenticated/warnings_/proposals/'
+      path: '/warnings/proposals'
+      fullPath: '/warnings/proposals/'
+      preLoaderRoute: typeof AuthenticatedWarningsProposalsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/warnings_/proposals/$id': {
+      id: '/_authenticated/warnings_/proposals/$id'
+      path: '/warnings/proposals/$id'
+      fullPath: '/warnings/proposals/$id'
+      preLoaderRoute: typeof AuthenticatedWarningsProposalsIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -994,8 +1034,10 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSpeakersIndexRoute: typeof AuthenticatedSpeakersIndexRoute
   AuthenticatedMentorAssignmentsIdRoute: typeof AuthenticatedMentorAssignmentsIdRoute
   AuthenticatedReportsHoldingsIdRoute: typeof AuthenticatedReportsHoldingsIdRoute
+  AuthenticatedWarningsProposalsIdRoute: typeof AuthenticatedWarningsProposalsIdRoute
   AuthenticatedMentorAssignmentsIndexRoute: typeof AuthenticatedMentorAssignmentsIndexRoute
   AuthenticatedReportsHoldingsIndexRoute: typeof AuthenticatedReportsHoldingsIndexRoute
+  AuthenticatedWarningsProposalsIndexRoute: typeof AuthenticatedWarningsProposalsIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -1039,10 +1081,13 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSpeakersIndexRoute: AuthenticatedSpeakersIndexRoute,
   AuthenticatedMentorAssignmentsIdRoute: AuthenticatedMentorAssignmentsIdRoute,
   AuthenticatedReportsHoldingsIdRoute: AuthenticatedReportsHoldingsIdRoute,
+  AuthenticatedWarningsProposalsIdRoute: AuthenticatedWarningsProposalsIdRoute,
   AuthenticatedMentorAssignmentsIndexRoute:
     AuthenticatedMentorAssignmentsIndexRoute,
   AuthenticatedReportsHoldingsIndexRoute:
     AuthenticatedReportsHoldingsIndexRoute,
+  AuthenticatedWarningsProposalsIndexRoute:
+    AuthenticatedWarningsProposalsIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
