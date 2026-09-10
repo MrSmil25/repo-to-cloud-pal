@@ -641,15 +641,67 @@ function VerifyTab({ claims }: { claims: CollectionPayment[] }) {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  if (claims.length === 0)
-    return (
-      <p className="rounded-2xl border bg-card p-6 text-sm text-muted-foreground">
-        Tidak ada klaim yang menunggu verifikasi.
-      </p>
-    );
-
   return (
     <>
+      <div className="mb-4 inline-flex rounded-xl border bg-card p-1">
+        <button
+          type="button"
+          onClick={() => setMode("pending")}
+          className={`rounded-lg px-3 py-1.5 text-sm font-medium ${mode === "pending" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
+        >
+          Menunggu Verifikasi
+        </button>
+        <button
+          type="button"
+          onClick={() => setMode("history")}
+          className={`rounded-lg px-3 py-1.5 text-sm font-medium ${mode === "history" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
+        >
+          Riwayat Verifikasi Saya
+        </button>
+      </div>
+
+      {mode === "history" ? (
+        <div className="overflow-x-auto rounded-2xl border bg-card">
+          <table className="w-full text-sm">
+            <thead className="bg-muted/50 text-left">
+              <tr>
+                <th className="px-4 py-2 font-semibold">Program</th>
+                <th className="px-4 py-2 font-semibold">Anggota</th>
+                <th className="px-4 py-2 font-semibold">Jumlah</th>
+                <th className="px-4 py-2 font-semibold">Diverifikasi Pada</th>
+                <th className="px-4 py-2 font-semibold">Aksi</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {myVerifications.map((v) => (
+                <tr key={v.id}>
+                  <td className="px-4 py-2">{v.collections?.title ?? "-"}</td>
+                  <td className="px-4 py-2">{v.profiles?.full_name ?? "-"}</td>
+                  <td className="px-4 py-2">{formatRupiah(v.amount_paid ?? 0)}</td>
+                  <td className="px-4 py-2">{formatDateTimeIndo(v.verified_at)}</td>
+                  <td className="px-4 py-2">
+                    <Button size="sm" variant="outline" onClick={() => setHistory(v)}>
+                      <Eye className="size-4" /> Lihat Bukti
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+              {myVerifications.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="px-4 py-4 text-muted-foreground">
+                    Belum ada tagihan yang kamu verifikasi.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+          <PaymentHistoryDialog payment={history} onClose={() => setHistory(null)} />
+        </div>
+      ) : claims.length === 0 ? (
+        <p className="rounded-2xl border bg-card p-6 text-sm text-muted-foreground">
+          Tidak ada klaim yang menunggu verifikasi.
+        </p>
+      ) : (
       <div className="space-y-3">
         {claims.map((c) => (
           <div key={c.id} className="rounded-2xl border bg-card p-5 shadow-sm">
