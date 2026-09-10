@@ -13,6 +13,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  fetchWarnings,
+  WARNING_LEVEL_BADGE,
+  WARNING_LEVEL_LABEL,
+  WARNING_STATUS_BADGE,
+} from "@/lib/warnings";
 import { UserAvatar } from "@/components/UserAvatar";
 import { useMyProfile, useProfiles, isBPH } from "@/hooks/useProfile";
 import {

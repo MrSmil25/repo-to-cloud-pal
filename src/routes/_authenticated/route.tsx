@@ -95,6 +95,7 @@ const navSections = [
       { to: "/reports/holdings", label: "Serah Terima", icon: Boxes },
       { to: "/coaching", label: "Catatan Bimbingan", icon: NotebookPen },
       { to: "/contributions", label: "Feed Kontribusi", icon: Megaphone },
+      { to: "/warnings", label: "Peringatan (SP)", icon: AlertTriangle },
     ] as const,
   },
   {
