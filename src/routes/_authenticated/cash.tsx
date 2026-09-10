@@ -613,6 +613,13 @@ function VerifyTab({ claims }: { claims: CollectionPayment[] }) {
   const qc = useQueryClient();
   const [rejecting, setRejecting] = useState<CollectionPayment | null>(null);
   const [reason, setReason] = useState("");
+  const [mode, setMode] = useState<"pending" | "history">("pending");
+  const [history, setHistory] = useState<CollectionPayment | null>(null);
+  const { data: myVerifications = [] } = useQuery({
+    queryKey: ["my-cash-verifications"],
+    queryFn: fetchMyVerifications,
+    enabled: mode === "history",
+  });
 
   function refresh() {
     qc.invalidateQueries({ queryKey: ["cash-pending-claims"] });
@@ -728,6 +735,7 @@ function VerifyTab({ claims }: { claims: CollectionPayment[] }) {
           </div>
         ))}
       </div>
+      )}
 
       <Dialog open={!!rejecting} onOpenChange={(o) => !o && setRejecting(null)}>
         <DialogContent>
