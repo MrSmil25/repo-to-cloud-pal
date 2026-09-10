@@ -130,6 +130,12 @@ function MemberReportPage() {
     enabled: !!query,
   });
 
+  const memberWarnings = useQuery({
+    queryKey: ["warnings", "member", query?.member],
+    queryFn: () => fetchWarnings({ memberId: query!.member }),
+    enabled: !!query,
+  });
+
   const memberProfile = profiles.find((p) => p.id === (query?.member ?? selected));
   const r = report.data;
 
@@ -217,6 +223,7 @@ function MemberReportPage() {
               <TabsTrigger value="metrik">Metrik</TabsTrigger>
               <TabsTrigger value="bimbingan">Catatan Bimbingan</TabsTrigger>
               <TabsTrigger value="kontribusi">Catatan Kontribusi</TabsTrigger>
+              <TabsTrigger value="peringatan">Riwayat Peringatan</TabsTrigger>
             </TabsList>
 
             <TabsContent value="metrik" className="mt-4">
