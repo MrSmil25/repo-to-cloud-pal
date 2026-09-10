@@ -142,8 +142,39 @@ function DashboardPage() {
         </Link>
       )}
 
+      {proposalsAboutMe.map((p) => (
+        <Link
+          key={p.id}
+          to="/warnings/proposals/$id"
+          params={{ id: p.id }}
+          className="block rounded-2xl border-2 border-amber-400 bg-amber-50 p-5 font-semibold text-amber-900 shadow-sm transition-colors hover:bg-amber-100"
+        >
+          Ada usulan peringatan untuk kamu. Kamu berhak menyanggah.
+        </Link>
+      ))}
+
       <UrgentBanners />
       <WelcomeGuideCard />
+
+      {myVoteProposals.length > 0 && (
+        <Link
+          to="/warnings/proposals"
+          className="block rounded-2xl border bg-card p-5 shadow-sm transition-colors hover:bg-accent/40"
+        >
+          Ada <span className="font-semibold">{myVoteProposals.length}</span> usulan peringatan
+          menunggu suara kamu.
+        </Link>
+      )}
+
+      {bphOrSupervisor && activeProposals.length > 0 && (
+        <Link
+          to="/warnings/proposals"
+          className="block rounded-2xl border bg-card p-5 shadow-sm transition-colors hover:bg-accent/40"
+        >
+          Usulan aktif di organisasi:{" "}
+          <span className="font-semibold">{activeProposals.length}</span>
+        </Link>
+      )}
 
       {kadiv && divisionWarningCount > 0 && (
         <Link
