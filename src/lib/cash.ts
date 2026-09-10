@@ -73,8 +73,10 @@ export type CollectionPayment = {
   verified_by: string | null;
   verified_at: string | null;
   reject_reason: string | null;
+  created_at?: string | null;
   collections?: Collection | null;
   profiles?: { id: string; full_name: string | null; division: string | null; photo_url: string | null } | null;
+  verifier?: { id: string; full_name: string | null } | null;
 };
 
 export type CashExpense = {
@@ -110,7 +112,7 @@ export async function fetchMyBills(): Promise<CollectionPayment[]> {
   if (!uid) return [];
   const { data, error } = await db
     .from("collection_payments")
-    .select("*, collections(*)")
+    .select("*, collections(*), verifier:verified_by(id,full_name)")
     .eq("member_id", uid)
     .order("created_at", { ascending: false });
   if (error) throw error;
@@ -126,11 +128,42 @@ export async function fetchCollectionProgress(): Promise<CollectionProgress[]> {
 export async function fetchCollectionPayments(collectionId: string): Promise<CollectionPayment[]> {
   const { data, error } = await db
     .from("collection_payments")
-    .select("*, profiles:member_id(id,full_name,division,photo_url)")
+    .select(
+      "*, collections(*), profiles:member_id(id,full_name,division,photo_url), verifier:verified_by(id,full_name)",
+    )
     .eq("collection_id", collectionId);
   if (error) throw error;
   return (data ?? []) as CollectionPayment[];
 }
+
+/** Tagihan yang diverifikasi oleh pengguna saat ini (log kerja bendahara). */
+export async function fetchMyVerifications(): Promise<CollectionPayment[]> {
+  const { data: userData } = await supabase.auth.getUser();
+  const uid = userData.user?.id;
+  if (!uid) return [];
+  const { data, error } = await db
+    .from("collection_payments")
+    .select(
+      "*, collections(*), profiles:member_id(id,full_name,division,photo_url), verifier:verified_by(id,full_name)",
+    )
+    .eq("verified_by", uid)
+    .eq("status", "Lunas")
+    .order("verified_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as CollectionPayment[];
+}
+
+/** Semua tagihan kas milik satu anggota (untuk rapor anggota). */
+export async function fetchMemberBills(memberId: string): Promise<CollectionPayment[]> {
+  const { data, error } = await db
+    .from("collection_payments")
+    .select("*, collections(*), verifier:verified_by(id,full_name)")
+    .eq("member_id", memberId)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as CollectionPayment[];
+}
+
 
 export async function fetchPendingClaims(): Promise<CollectionPayment[]> {
   const { data, error } = await db

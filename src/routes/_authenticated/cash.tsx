@@ -2,7 +2,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { CheckCircle2, Plus, RefreshCw, Wallet } from "lucide-react";
+import { CheckCircle2, Eye, Plus, RefreshCw, Wallet } from "lucide-react";
+import {
+  PaymentHistoryDialog,
+  formatDateTimeIndo,
+} from "@/components/cash/PaymentHistoryDialog";
 import { useDivisions, useMyProfile } from "@/hooks/useProfile";
 import { formatDateID, formatRupiah, relativeTime } from "@/lib/format";
 import { uploadDocument } from "@/lib/fund-requests";
@@ -22,6 +26,7 @@ import {
   fetchCollectionPayments,
   fetchCollectionProgress,
   fetchMyBills,
+  fetchMyVerifications,
   fetchPendingClaims,
   generateBills,
   rejectPayment,
@@ -143,6 +148,7 @@ function CashPage() {
 function MyBillsTab() {
   const { data: bills = [], isLoading } = useQuery({ queryKey: ["my-bills"], queryFn: fetchMyBills });
   const [active, setActive] = useState<CollectionPayment | null>(null);
+  const [history, setHistory] = useState<CollectionPayment | null>(null);
 
   if (isLoading) return <p className="text-sm text-muted-foreground">Memuat tagihan…</p>;
   if (bills.length === 0)
@@ -197,16 +203,49 @@ function MyBillsTab() {
                 </div>
               )}
               {bill.status === "Lunas" && (
-                <p className="mt-3 inline-flex items-center gap-2 text-sm font-medium text-emerald-700">
-                  <CheckCircle2 className="size-4" /> Lunas
-                  {bill.verified_at ? ` · ${formatDateID(bill.verified_at)}` : ""}
-                </p>
+                <div className="mt-3 rounded-xl border bg-muted/30 p-4">
+                  <p className="inline-flex items-center gap-2 text-sm font-medium text-emerald-700">
+                    <CheckCircle2 className="size-4" /> Lunas
+                    {bill.verified_at ? ` · ${formatDateTimeIndo(bill.verified_at)}` : ""}
+                  </p>
+                  <dl className="mt-2 space-y-1 text-sm">
+                    <div className="flex justify-between gap-3">
+                      <dt className="text-muted-foreground">Jumlah dibayar</dt>
+                      <dd className="font-medium">{formatRupiah(bill.amount_paid ?? 0)}</dd>
+                    </div>
+                    <div className="flex justify-between gap-3">
+                      <dt className="text-muted-foreground">Diklaim pada</dt>
+                      <dd className="font-medium">{formatDateTimeIndo(bill.claimed_at)}</dd>
+                    </div>
+                    <div className="flex justify-between gap-3">
+                      <dt className="text-muted-foreground">Diverifikasi oleh</dt>
+                      <dd className="font-medium">
+                        {bill.verifier?.full_name ?? "—"}
+                        {bill.verified_at ? ` · ${formatDateTimeIndo(bill.verified_at)}` : ""}
+                      </dd>
+                    </div>
+                  </dl>
+                  {bill.reject_reason && (
+                    <p className="mt-2 text-xs text-amber-700">
+                      Klaim sebelumnya sempat ditolak: {bill.reject_reason}
+                    </p>
+                  )}
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="mt-3"
+                    onClick={() => setHistory(bill)}
+                  >
+                    <Eye className="size-4" /> Lihat Bukti
+                  </Button>
+                </div>
               )}
             </div>
           );
         })}
       </div>
       <ClaimDialog bill={active} onClose={() => setActive(null)} />
+      <PaymentHistoryDialog payment={history} onClose={() => setHistory(null)} />
     </>
   );
 }
@@ -483,6 +522,7 @@ function ProgramDetailDialog({
   onClose: () => void;
 }) {
   const qc = useQueryClient();
+  const [history, setHistory] = useState<CollectionPayment | null>(null);
   const { data: rows = [] } = useQuery({
     queryKey: ["collection-payments", program?.collection_id],
     queryFn: () => fetchCollectionPayments(program!.collection_id),
@@ -547,7 +587,14 @@ function ProgramDetailDialog({
             return (
               <li key={r.id} className="flex items-center justify-between gap-3 px-4 py-3 text-sm">
                 <span>{r.profiles?.full_name ?? "Anggota"}</span>
-                <Badge label={st.label} className={st.className} />
+                <span className="flex items-center gap-2">
+                  <Badge label={st.label} className={st.className} />
+                  {r.status === "Lunas" && (
+                    <Button size="sm" variant="outline" onClick={() => setHistory(r)}>
+                      <Eye className="size-4" /> Riwayat
+                    </Button>
+                  )}
+                </span>
               </li>
             );
           })}
@@ -555,6 +602,7 @@ function ProgramDetailDialog({
             <li className="px-4 py-3 text-sm text-muted-foreground">Belum ada tagihan.</li>
           )}
         </ul>
+        <PaymentHistoryDialog payment={history} onClose={() => setHistory(null)} />
       </DialogContent>
     </Dialog>
   );
@@ -566,6 +614,13 @@ function VerifyTab({ claims }: { claims: CollectionPayment[] }) {
   const qc = useQueryClient();
   const [rejecting, setRejecting] = useState<CollectionPayment | null>(null);
   const [reason, setReason] = useState("");
+  const [mode, setMode] = useState<"pending" | "history">("pending");
+  const [history, setHistory] = useState<CollectionPayment | null>(null);
+  const { data: myVerifications = [] } = useQuery({
+    queryKey: ["my-cash-verifications"],
+    queryFn: fetchMyVerifications,
+    enabled: mode === "history",
+  });
 
   function refresh() {
     qc.invalidateQueries({ queryKey: ["cash-pending-claims"] });
@@ -594,15 +649,67 @@ function VerifyTab({ claims }: { claims: CollectionPayment[] }) {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  if (claims.length === 0)
-    return (
-      <p className="rounded-2xl border bg-card p-6 text-sm text-muted-foreground">
-        Tidak ada klaim yang menunggu verifikasi.
-      </p>
-    );
-
   return (
     <>
+      <div className="mb-4 inline-flex rounded-xl border bg-card p-1">
+        <button
+          type="button"
+          onClick={() => setMode("pending")}
+          className={`rounded-lg px-3 py-1.5 text-sm font-medium ${mode === "pending" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
+        >
+          Menunggu Verifikasi
+        </button>
+        <button
+          type="button"
+          onClick={() => setMode("history")}
+          className={`rounded-lg px-3 py-1.5 text-sm font-medium ${mode === "history" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
+        >
+          Riwayat Verifikasi Saya
+        </button>
+      </div>
+
+      {mode === "history" ? (
+        <div className="overflow-x-auto rounded-2xl border bg-card">
+          <table className="w-full text-sm">
+            <thead className="bg-muted/50 text-left">
+              <tr>
+                <th className="px-4 py-2 font-semibold">Program</th>
+                <th className="px-4 py-2 font-semibold">Anggota</th>
+                <th className="px-4 py-2 font-semibold">Jumlah</th>
+                <th className="px-4 py-2 font-semibold">Diverifikasi Pada</th>
+                <th className="px-4 py-2 font-semibold">Aksi</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {myVerifications.map((v) => (
+                <tr key={v.id}>
+                  <td className="px-4 py-2">{v.collections?.title ?? "-"}</td>
+                  <td className="px-4 py-2">{v.profiles?.full_name ?? "-"}</td>
+                  <td className="px-4 py-2">{formatRupiah(v.amount_paid ?? 0)}</td>
+                  <td className="px-4 py-2">{formatDateTimeIndo(v.verified_at)}</td>
+                  <td className="px-4 py-2">
+                    <Button size="sm" variant="outline" onClick={() => setHistory(v)}>
+                      <Eye className="size-4" /> Lihat Bukti
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+              {myVerifications.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="px-4 py-4 text-muted-foreground">
+                    Belum ada tagihan yang kamu verifikasi.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+          <PaymentHistoryDialog payment={history} onClose={() => setHistory(null)} />
+        </div>
+      ) : claims.length === 0 ? (
+        <p className="rounded-2xl border bg-card p-6 text-sm text-muted-foreground">
+          Tidak ada klaim yang menunggu verifikasi.
+        </p>
+      ) : (
       <div className="space-y-3">
         {claims.map((c) => (
           <div key={c.id} className="rounded-2xl border bg-card p-5 shadow-sm">
@@ -629,6 +736,7 @@ function VerifyTab({ claims }: { claims: CollectionPayment[] }) {
           </div>
         ))}
       </div>
+      )}
 
       <Dialog open={!!rejecting} onOpenChange={(o) => !o && setRejecting(null)}>
         <DialogContent>
