@@ -140,6 +140,14 @@ function MemberReportPage() {
     enabled: !!query,
   });
 
+  const [billHistory, setBillHistory] = useState<CollectionPayment | null>(null);
+
+  const memberBills = useQuery({
+    queryKey: ["member-cash-bills", query?.member],
+    queryFn: () => fetchMemberBills(query!.member),
+    enabled: !!query,
+  });
+
   const memberWarnings = useQuery({
     queryKey: ["warnings", "member", query?.member],
     queryFn: () => fetchWarnings({ memberId: query!.member }),
