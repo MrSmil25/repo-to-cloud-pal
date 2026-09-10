@@ -319,6 +319,48 @@ function MemberReportPage() {
                 ))
               )}
             </TabsContent>
+
+            <TabsContent value="peringatan" className="mt-4 space-y-3">
+              {memberWarnings.isLoading ? (
+                <p className="text-sm text-muted-foreground">Memuat…</p>
+              ) : (memberWarnings.data ?? []).length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  Belum ada catatan peringatan untuk anggota ini.
+                </p>
+              ) : (
+                (memberWarnings.data ?? []).map((w) => (
+                  <article key={w.id} className="rounded-2xl border bg-card p-4 shadow-sm">
+                    <div className="flex flex-wrap items-center gap-2 text-xs">
+                      <span
+                        className={`rounded-full px-2 py-0.5 font-semibold ${WARNING_LEVEL_BADGE[w.level] ?? "bg-secondary"}`}
+                      >
+                        {WARNING_LEVEL_LABEL[w.level] ?? w.level}
+                      </span>
+                      <span
+                        className={`rounded-full px-2 py-0.5 font-semibold ${WARNING_STATUS_BADGE[w.status] ?? "bg-secondary"}`}
+                      >
+                        {w.status}
+                      </span>
+                      <span className="text-muted-foreground">
+                        {formatDateID(w.issued_at ?? w.created_at)}
+                      </span>
+                      <span className="text-muted-foreground">
+                        diterbitkan oleh {w.issuer?.full_name ?? "—"}
+                      </span>
+                    </div>
+                    <p className="mt-2 whitespace-pre-wrap text-sm">{w.reason}</p>
+                    {w.member_response && (
+                      <div className="mt-2 rounded-xl border bg-muted/40 p-3">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                          Tanggapan anggota
+                        </p>
+                        <p className="mt-1 whitespace-pre-wrap text-sm">{w.member_response}</p>
+                      </div>
+                    )}
+                  </article>
+                ))
+              )}
+            </TabsContent>
           </Tabs>
         </>
       )}
