@@ -117,8 +117,27 @@ function DashboardPage() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
+      {unackWarnings > 0 && (
+        <Link
+          to="/warnings"
+          className="block rounded-2xl border-2 border-red-400 bg-red-50 p-5 font-semibold text-red-900 shadow-sm transition-colors hover:bg-red-100"
+        >
+          Kamu punya {unackWarnings} peringatan yang perlu dibaca. Klik untuk membukanya.
+        </Link>
+      )}
+
       <UrgentBanners />
       <WelcomeGuideCard />
+
+      {kadiv && divisionWarningCount > 0 && (
+        <Link
+          to="/warnings"
+          className="block rounded-2xl border bg-card p-5 shadow-sm transition-colors hover:bg-accent/40"
+        >
+          SP aktif di divisi kamu:{" "}
+          <span className="font-semibold">{divisionWarningCount}</span>
+        </Link>
+      )}
 
       {unpaidBills > 0 && (
         <Link
