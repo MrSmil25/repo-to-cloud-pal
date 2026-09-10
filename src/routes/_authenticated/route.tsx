@@ -29,6 +29,7 @@ import {
   MailPlus,
   BookOpen,
   AlertTriangle,
+  Vote,
 } from "lucide-react";
 import { useState } from "react";
 import { supabase } from "@/lib/supabase-external";
