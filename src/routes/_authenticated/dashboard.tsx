@@ -96,6 +96,19 @@ function DashboardPage() {
     (w) => w.member?.division === profile?.division,
   ).length;
 
+  const bphOrSupervisor = isBPH(profile?.role) || isBPHOrSupervisor(profile?.role);
+  const { data: proposals = [] } = useQuery({
+    queryKey: ["proposals"],
+    queryFn: fetchProposals,
+    enabled: !!profile?.id,
+  });
+  const activeProposals = proposals.filter((p) => p.status === "Voting");
+  const myVoteProposals = activeProposals.filter((p) =>
+    isEligibleVoter(p, profile ? { id: profile.id, division: profile.division } : null),
+  );
+  const proposalsAboutMe = activeProposals.filter((p) => p.target_member_id === profile?.id);
+
+
   const activeEvents = events.filter((e) =>
     ["Planning", "Preparation", "Live"].includes(e.status ?? ""),
   );
