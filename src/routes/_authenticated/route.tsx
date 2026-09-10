@@ -28,6 +28,7 @@ import {
   Mic,
   MailPlus,
   BookOpen,
+  AlertTriangle,
 } from "lucide-react";
 import { useState } from "react";
 import { supabase } from "@/lib/supabase-external";
