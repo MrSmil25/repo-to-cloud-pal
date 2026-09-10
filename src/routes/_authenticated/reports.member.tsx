@@ -224,7 +224,75 @@ function MemberReportPage() {
               <TabsTrigger value="bimbingan">Catatan Bimbingan</TabsTrigger>
               <TabsTrigger value="kontribusi">Catatan Kontribusi</TabsTrigger>
               <TabsTrigger value="peringatan">Riwayat Peringatan</TabsTrigger>
+              <TabsTrigger value="kas">Riwayat Kas</TabsTrigger>
             </TabsList>
+
+            <TabsContent value="kas" className="mt-4">
+              {memberBills.isLoading ? (
+                <p className="text-sm text-muted-foreground">Memuat…</p>
+              ) : (memberBills.data ?? []).length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  Belum ada tagihan kas untuk anggota ini.
+                </p>
+              ) : (
+                <div className="overflow-x-auto rounded-2xl border bg-card">
+                  <table className="w-full text-sm">
+                    <thead className="bg-muted/50 text-left">
+                      <tr>
+                        <th className="px-4 py-2 font-semibold">Program</th>
+                        <th className="px-4 py-2 font-semibold">Jenis</th>
+                        <th className="px-4 py-2 font-semibold">Nominal</th>
+                        <th className="px-4 py-2 font-semibold">Status</th>
+                        <th className="px-4 py-2 font-semibold">Diklaim</th>
+                        <th className="px-4 py-2 font-semibold">Diverifikasi</th>
+                        <th className="px-4 py-2 font-semibold">Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y">
+                      {(memberBills.data ?? []).map((b) => {
+                        const st =
+                          PAYMENT_STATUS_META[b.status] ?? PAYMENT_STATUS_META['Belum_Bayar']!;
+                        const kind = KIND_META[b.collections?.kind ?? "Kas_Rutin"] ?? KIND_META['Kas_Rutin']!;
+                        return (
+                          <tr key={b.id}>
+                            <td className="px-4 py-2">{b.collections?.title ?? "-"}</td>
+                            <td className="px-4 py-2">{kind.label}</td>
+                            <td className="px-4 py-2">
+                              {formatRupiah(b.amount_paid ?? b.collections?.amount_per_person ?? 0)}
+                            </td>
+                            <td className="px-4 py-2">
+                              <span
+                                className={`rounded-full px-2 py-0.5 text-xs font-semibold ${st.className}`}
+                              >
+                                {st.label}
+                              </span>
+                            </td>
+                            <td className="px-4 py-2">{formatDateTimeIndo(b.claimed_at)}</td>
+                            <td className="px-4 py-2">{formatDateTimeIndo(b.verified_at)}</td>
+                            <td className="px-4 py-2">
+                              {b.status === "Lunas" && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => setBillHistory(b)}
+                                >
+                                  Lihat Bukti
+                                </Button>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                  <PaymentHistoryDialog
+                    payment={billHistory}
+                    memberName={r.full_name}
+                    onClose={() => setBillHistory(null)}
+                  />
+                </div>
+              )}
+            </TabsContent>
 
             <TabsContent value="metrik" className="mt-4">
               <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
