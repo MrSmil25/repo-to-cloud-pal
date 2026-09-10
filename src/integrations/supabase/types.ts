@@ -3830,6 +3830,7 @@ export type Database = {
         Args: never
         Returns: Database["public"]["Enums"]["user_role"]
       }
+      has_voted: { Args: { p_proposal: string }; Returns: boolean }
       is_event_pic: { Args: { target_event: string }; Returns: boolean }
       is_my_assignment: { Args: { p_assignment: string }; Returns: boolean }
       member_report: {
@@ -3882,6 +3883,17 @@ export type Database = {
           p_user: string
         }
         Returns: undefined
+      }
+      proposal_vote_summary: {
+        Args: { p_proposal: string }
+        Returns: {
+          abstain: number
+          agree: number
+          disagree: number
+          eligible: number
+          finished: boolean
+          votes_cast: number
+        }[]
       }
       run_daily_reminders: { Args: never; Returns: undefined }
       take_okr_snapshot: {
