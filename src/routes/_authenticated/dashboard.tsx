@@ -12,6 +12,9 @@ import { UrgentBanners } from "@/components/announcements/UrgentBanners";
 import { WelcomeGuideCard } from "@/components/WelcomeGuideCard";
 import { countContributionsThisWeek, countUnacknowledgedCoaching, isKadiv } from "@/lib/hr";
 import { countUnacknowledgedWarnings, fetchWarnings } from "@/lib/warnings";
+import { fetchProposals, isEligibleVoter } from "@/lib/proposals";
+import { isBPH } from "@/hooks/useProfile";
+import { isBPHOrSupervisor } from "@/lib/hr";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
