@@ -204,7 +204,7 @@ export function ProposalFormDialog({
             {CHECKLIST.map((text, i) => (
               <label key={text} className="flex cursor-pointer items-start gap-3 text-sm">
                 <Checkbox
-                  checked={checks[i]}
+                  checked={checks[i] ?? false}
                   onCheckedChange={(v) =>
                     setChecks((prev) => prev.map((c, j) => (j === i ? Boolean(v) : c)))
                   }
