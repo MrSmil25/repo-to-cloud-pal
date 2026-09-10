@@ -26,6 +26,7 @@ import {
   fetchCollectionPayments,
   fetchCollectionProgress,
   fetchMyBills,
+  fetchMyVerifications,
   fetchPendingClaims,
   generateBills,
   rejectPayment,
