@@ -167,17 +167,30 @@ export async function submitTargetResponse(id: string, response: string) {
   if (error) throw error;
 }
 
+export const CANCEL_MARK = "[Dibatalkan]";
+
 export async function cancelProposal(id: string, reason: string) {
+  const current = await fetchProposal(id);
+  const merged = `${current?.reason ?? ""}\n\n${CANCEL_MARK} ${reason}`.trim();
   const { error } = await db
     .from("warning_proposals")
     .update({
       status: "Dibatalkan",
       outcome_recorded_at: new Date().toISOString(),
-      target_response: null,
-      reason,
+      reason: merged,
     })
     .eq("id", id);
   if (error) throw error;
+}
+
+/** Pisahkan alasan asli dan alasan pembatalan yang ditempelkan di akhir. */
+export function splitReason(reason: string) {
+  const i = reason.indexOf(CANCEL_MARK);
+  if (i < 0) return { reason, cancelReason: null as string | null };
+  return {
+    reason: reason.slice(0, i).trim(),
+    cancelReason: reason.slice(i + CANCEL_MARK.length).trim(),
+  };
 }
 
 export async function castVote(proposalId: string, voterId: string, choice: string) {
