@@ -33,6 +33,16 @@ import {
   CONTRIBUTION_KIND_LABEL,
 } from "@/lib/hr";
 import { formatDateID, formatRupiah } from "@/lib/format";
+import {
+  PaymentHistoryDialog,
+  formatDateTimeIndo,
+} from "@/components/cash/PaymentHistoryDialog";
+import {
+  KIND_META,
+  PAYMENT_STATUS_META,
+  fetchMemberBills,
+  type CollectionPayment,
+} from "@/lib/cash";
 
 export const Route = createFileRoute("/_authenticated/reports/member")({
   head: () => ({
