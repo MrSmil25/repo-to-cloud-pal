@@ -2,7 +2,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { CheckCircle2, Plus, RefreshCw, Wallet } from "lucide-react";
+import { CheckCircle2, Eye, Plus, RefreshCw, Wallet } from "lucide-react";
+import {
+  PaymentHistoryDialog,
+  formatDateTimeIndo,
+} from "@/components/cash/PaymentHistoryDialog";
 import { useDivisions, useMyProfile } from "@/hooks/useProfile";
 import { formatDateID, formatRupiah, relativeTime } from "@/lib/format";
 import { uploadDocument } from "@/lib/fund-requests";
@@ -143,6 +147,7 @@ function CashPage() {
 function MyBillsTab() {
   const { data: bills = [], isLoading } = useQuery({ queryKey: ["my-bills"], queryFn: fetchMyBills });
   const [active, setActive] = useState<CollectionPayment | null>(null);
+  const [history, setHistory] = useState<CollectionPayment | null>(null);
 
   if (isLoading) return <p className="text-sm text-muted-foreground">Memuat tagihan…</p>;
   if (bills.length === 0)
