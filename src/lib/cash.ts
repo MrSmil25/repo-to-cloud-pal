@@ -73,8 +73,10 @@ export type CollectionPayment = {
   verified_by: string | null;
   verified_at: string | null;
   reject_reason: string | null;
+  created_at?: string | null;
   collections?: Collection | null;
   profiles?: { id: string; full_name: string | null; division: string | null; photo_url: string | null } | null;
+  verifier?: { id: string; full_name: string | null } | null;
 };
 
 export type CashExpense = {
