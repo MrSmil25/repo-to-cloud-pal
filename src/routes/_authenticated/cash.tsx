@@ -197,16 +197,49 @@ function MyBillsTab() {
                 </div>
               )}
               {bill.status === "Lunas" && (
-                <p className="mt-3 inline-flex items-center gap-2 text-sm font-medium text-emerald-700">
-                  <CheckCircle2 className="size-4" /> Lunas
-                  {bill.verified_at ? ` · ${formatDateID(bill.verified_at)}` : ""}
-                </p>
+                <div className="mt-3 rounded-xl border bg-muted/30 p-4">
+                  <p className="inline-flex items-center gap-2 text-sm font-medium text-emerald-700">
+                    <CheckCircle2 className="size-4" /> Lunas
+                    {bill.verified_at ? ` · ${formatDateTimeIndo(bill.verified_at)}` : ""}
+                  </p>
+                  <dl className="mt-2 space-y-1 text-sm">
+                    <div className="flex justify-between gap-3">
+                      <dt className="text-muted-foreground">Jumlah dibayar</dt>
+                      <dd className="font-medium">{formatRupiah(bill.amount_paid ?? 0)}</dd>
+                    </div>
+                    <div className="flex justify-between gap-3">
+                      <dt className="text-muted-foreground">Diklaim pada</dt>
+                      <dd className="font-medium">{formatDateTimeIndo(bill.claimed_at)}</dd>
+                    </div>
+                    <div className="flex justify-between gap-3">
+                      <dt className="text-muted-foreground">Diverifikasi oleh</dt>
+                      <dd className="font-medium">
+                        {bill.verifier?.full_name ?? "—"}
+                        {bill.verified_at ? ` · ${formatDateTimeIndo(bill.verified_at)}` : ""}
+                      </dd>
+                    </div>
+                  </dl>
+                  {bill.reject_reason && (
+                    <p className="mt-2 text-xs text-amber-700">
+                      Klaim sebelumnya sempat ditolak: {bill.reject_reason}
+                    </p>
+                  )}
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="mt-3"
+                    onClick={() => setHistory(bill)}
+                  >
+                    <Eye className="size-4" /> Lihat Bukti
+                  </Button>
+                </div>
               )}
             </div>
           );
         })}
       </div>
       <ClaimDialog bill={active} onClose={() => setActive(null)} />
+      <PaymentHistoryDialog payment={history} onClose={() => setHistory(null)} />
     </>
   );
 }
