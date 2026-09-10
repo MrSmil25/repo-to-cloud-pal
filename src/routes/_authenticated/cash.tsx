@@ -521,6 +521,7 @@ function ProgramDetailDialog({
   onClose: () => void;
 }) {
   const qc = useQueryClient();
+  const [history, setHistory] = useState<CollectionPayment | null>(null);
   const { data: rows = [] } = useQuery({
     queryKey: ["collection-payments", program?.collection_id],
     queryFn: () => fetchCollectionPayments(program!.collection_id),
@@ -585,7 +586,14 @@ function ProgramDetailDialog({
             return (
               <li key={r.id} className="flex items-center justify-between gap-3 px-4 py-3 text-sm">
                 <span>{r.profiles?.full_name ?? "Anggota"}</span>
-                <Badge label={st.label} className={st.className} />
+                <span className="flex items-center gap-2">
+                  <Badge label={st.label} className={st.className} />
+                  {r.status === "Lunas" && (
+                    <Button size="sm" variant="outline" onClick={() => setHistory(r)}>
+                      <Eye className="size-4" /> Riwayat
+                    </Button>
+                  )}
+                </span>
               </li>
             );
           })}
@@ -593,6 +601,7 @@ function ProgramDetailDialog({
             <li className="px-4 py-3 text-sm text-muted-foreground">Belum ada tagihan.</li>
           )}
         </ul>
+        <PaymentHistoryDialog payment={history} onClose={() => setHistory(null)} />
       </DialogContent>
     </Dialog>
   );
