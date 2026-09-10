@@ -3636,6 +3636,19 @@ export type Database = {
         }
         Relationships: []
       }
+      cashflow_projection: {
+        Row: {
+          pemasukan_perkiraan_30h: number | null
+          pemasukan_perkiraan_60h: number | null
+          pemasukan_perkiraan_90h: number | null
+          pengeluaran_rata2_bulanan: number | null
+          proyeksi_30h: number | null
+          proyeksi_60h: number | null
+          proyeksi_90h: number | null
+          saldo_sekarang: number | null
+        }
+        Relationships: []
+      }
       collection_progress: {
         Row: {
           amount_per_person: number | null
@@ -3659,6 +3672,18 @@ export type Database = {
             referencedColumns: ["code"]
           },
         ]
+      }
+      financial_wallets: {
+        Row: {
+          kas_keluar_total: number | null
+          kas_masuk_total: number | null
+          kas_saldo: number | null
+          ops_keluar_total: number | null
+          ops_masuk_total: number | null
+          ops_saldo: number | null
+          total_saldo: number | null
+        }
+        Relationships: []
       }
       member_holdings: {
         Row: {
@@ -3730,6 +3755,16 @@ export type Database = {
             referencedColumns: ["code"]
           },
         ]
+      }
+      monthly_cashflow: {
+        Row: {
+          arah: string | null
+          bulan: string | null
+          category: string | null
+          dompet: string | null
+          total: number | null
+        }
+        Relationships: []
       }
       reimbursement_aging: {
         Row: {
@@ -3812,6 +3847,28 @@ export type Database = {
       create_task_from_decision: {
         Args: { p_decision_id: string }
         Returns: string
+      }
+      financial_category_breakdown: {
+        Args: { p_arah: string; p_end: string; p_start: string }
+        Returns: {
+          category: string
+          dompet: string
+          total: number
+        }[]
+      }
+      financial_period_summary: {
+        Args: { p_end: string; p_start: string }
+        Returns: {
+          kas_keluar: number
+          kas_masuk: number
+          kas_net: number
+          ops_keluar: number
+          ops_masuk: number
+          ops_net: number
+          total_keluar: number
+          total_masuk: number
+          total_net: number
+        }[]
       }
       generate_collection_bills: {
         Args: { p_collection: string }
